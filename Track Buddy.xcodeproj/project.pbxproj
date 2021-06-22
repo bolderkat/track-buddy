@@ -7,8 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		650B9BCA2682985D009A1D06 /* MotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650B9BC92682985D009A1D06 /* MotionManager.swift */; };
 		659BFC632682955A007CCDA2 /* Track_BuddyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659BFC622682955A007CCDA2 /* Track_BuddyApp.swift */; };
-		659BFC652682955A007CCDA2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659BFC642682955A007CCDA2 /* ContentView.swift */; };
+		659BFC652682955A007CCDA2 /* AccelerometerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659BFC642682955A007CCDA2 /* AccelerometerView.swift */; };
 		659BFC672682955D007CCDA2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 659BFC662682955D007CCDA2 /* Assets.xcassets */; };
 		659BFC6A2682955D007CCDA2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 659BFC692682955D007CCDA2 /* Preview Assets.xcassets */; };
 		659BFC752682955E007CCDA2 /* Track_BuddyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659BFC742682955E007CCDA2 /* Track_BuddyTests.swift */; };
@@ -33,9 +34,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		650B9BC92682985D009A1D06 /* MotionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionManager.swift; sourceTree = "<group>"; };
 		659BFC5F2682955A007CCDA2 /* Track Buddy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Track Buddy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		659BFC622682955A007CCDA2 /* Track_BuddyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Track_BuddyApp.swift; sourceTree = "<group>"; };
-		659BFC642682955A007CCDA2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		659BFC642682955A007CCDA2 /* AccelerometerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccelerometerView.swift; sourceTree = "<group>"; };
 		659BFC662682955D007CCDA2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		659BFC692682955D007CCDA2 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		659BFC6B2682955D007CCDA2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -72,6 +74,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		650B9BC826829771009A1D06 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				659BFC642682955A007CCDA2 /* AccelerometerView.swift */,
+			);
+			name = Views;
+			path = "New Group";
+			sourceTree = "<group>";
+		};
 		659BFC562682955A007CCDA2 = {
 			isa = PBXGroup;
 			children = (
@@ -96,7 +107,8 @@
 			isa = PBXGroup;
 			children = (
 				659BFC622682955A007CCDA2 /* Track_BuddyApp.swift */,
-				659BFC642682955A007CCDA2 /* ContentView.swift */,
+				650B9BC92682985D009A1D06 /* MotionManager.swift */,
+				650B9BC826829771009A1D06 /* Views */,
 				659BFC662682955D007CCDA2 /* Assets.xcassets */,
 				659BFC6B2682955D007CCDA2 /* Info.plist */,
 				659BFC682682955D007CCDA2 /* Preview Content */,
@@ -259,7 +271,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				659BFC652682955A007CCDA2 /* ContentView.swift in Sources */,
+				659BFC652682955A007CCDA2 /* AccelerometerView.swift in Sources */,
+				650B9BCA2682985D009A1D06 /* MotionManager.swift in Sources */,
 				659BFC632682955A007CCDA2 /* Track_BuddyApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
