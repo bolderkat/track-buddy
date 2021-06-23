@@ -54,6 +54,22 @@ struct AccelerometerView: View {
         }
     }
     
+    private func currentLabel(for direction: Direction) -> some View {
+        var value: Double = 0.0
+        
+        switch direction {
+        case .braking, .acceleration:
+            value = motionManager.z
+        case .right, .left:
+            value = motionManager.x
+        }
+        
+        let valueString = value > 0 ? String(format: "%.2f", value) : "0.00"
+        
+        return Text(valueString)
+            .foregroundColor(.orange)
+    }
+    
     private var graph: some View {
         GeometryReader { geometry in
             let bounds = min(geometry.size.width, geometry.size.height)
@@ -75,7 +91,7 @@ struct AccelerometerView: View {
     
     // MARK: Drawing Constants
     private let outerToInnerCircleDiamaterRatio = 20.0
-    private let outerEdgeGValue = 3.0
+    private let outerEdgeGValue = 3.0 // circle size doesn't appear to correspond with this set value when graph is resized :(
     
     private enum Direction {
         case braking
