@@ -13,6 +13,48 @@ struct AccelerometerView: View {
     @ObservedObject var motionManager = MotionManager()
     
     var body: some View {
+        HStack {
+            maxLabel(for: .right)
+            VStack {
+                maxLabel(for: .braking)
+                graph
+                maxLabel(for: .acceleration)
+            }
+            maxLabel(for: .left)
+        }
+    }
+    
+    private func maxLabel(for direction: Direction) -> some View {
+        // TODO: can use .formatted() for numbers if we set target to iOS 15.0
+        // TODO: also if we can find a way to pass values from motionManager through the vm to the view, we can move all this formatting logic to the vm
+        
+        var labelString = ""
+        var value: Double = 0.0
+        
+        switch direction {
+        case .braking:
+            labelString = "Max Braking"
+            value = motionManager.maxBraking
+        case .acceleration:
+            labelString = "Max Accel"
+            value = motionManager.maxAcceleration
+        case .right:
+            labelString = "Max Right"
+            value = motionManager.maxRight
+        case .left:
+            labelString = "Max Left"
+            value = motionManager.maxLeft
+        }
+        
+        let valueString = String(format: "%.2f", abs(value))
+        
+        return VStack {
+            Text(labelString)
+            Text("\(valueString) G")
+        }
+    }
+    
+    private var graph: some View {
         GeometryReader { geometry in
             let bounds = min(geometry.size.width, geometry.size.height)
             let innerCircleDiameter = bounds / outerToInnerCircleDiamaterRatio
@@ -34,15 +76,22 @@ struct AccelerometerView: View {
     // MARK: Drawing Constants
     private let outerToInnerCircleDiamaterRatio = 20.0
     private let outerEdgeGValue = 3.0
-  
+    
+    private enum Direction {
+        case braking
+        case acceleration
+        case right
+        case left
+    }
+    
 }
 
 extension AccelerometerView {
     class ViewModel: ObservableObject {
-//        @Published private var motionManager = MotionManager()
-//        var x: Double { motionManager.x }
-//        var y: Double { motionManager.y }
-//        var z: Double { motionManager.z }
+        //        @Published private var motionManager = MotionManager()
+        //        var x: Double { motionManager.x }
+        //        var y: Double { motionManager.y }
+        //        var z: Double { motionManager.z }
     }
 }
 
