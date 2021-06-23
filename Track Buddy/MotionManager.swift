@@ -19,7 +19,7 @@ class MotionManager: ObservableObject {
     init() {
         motionManager = CMMotionManager()
         if motionManager.isDeviceMotionAvailable {
-            motionManager.deviceMotionUpdateInterval = 1/60
+            motionManager.deviceMotionUpdateInterval = 1/100
             startDeviceMotion()
         }
     }
