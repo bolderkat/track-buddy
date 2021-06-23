@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		650B9BCA2682985D009A1D06 /* MotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650B9BC92682985D009A1D06 /* MotionManager.swift */; };
+		650B9BCC2682CE23009A1D06 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650B9BCB2682CE22009A1D06 /* CameraView.swift */; };
+		650B9BCE2682CF15009A1D06 /* AccelerometerOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650B9BCD2682CF15009A1D06 /* AccelerometerOverlay.swift */; };
 		659BFC632682955A007CCDA2 /* Track_BuddyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659BFC622682955A007CCDA2 /* Track_BuddyApp.swift */; };
 		659BFC652682955A007CCDA2 /* AccelerometerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 659BFC642682955A007CCDA2 /* AccelerometerView.swift */; };
 		659BFC672682955D007CCDA2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 659BFC662682955D007CCDA2 /* Assets.xcassets */; };
@@ -35,6 +37,8 @@
 
 /* Begin PBXFileReference section */
 		650B9BC92682985D009A1D06 /* MotionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionManager.swift; sourceTree = "<group>"; };
+		650B9BCB2682CE22009A1D06 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		650B9BCD2682CF15009A1D06 /* AccelerometerOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccelerometerOverlay.swift; sourceTree = "<group>"; };
 		659BFC5F2682955A007CCDA2 /* Track Buddy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Track Buddy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		659BFC622682955A007CCDA2 /* Track_BuddyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Track_BuddyApp.swift; sourceTree = "<group>"; };
 		659BFC642682955A007CCDA2 /* AccelerometerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccelerometerView.swift; sourceTree = "<group>"; };
@@ -78,6 +82,8 @@
 			isa = PBXGroup;
 			children = (
 				659BFC642682955A007CCDA2 /* AccelerometerView.swift */,
+				650B9BCB2682CE22009A1D06 /* CameraView.swift */,
+				650B9BCD2682CF15009A1D06 /* AccelerometerOverlay.swift */,
 			);
 			name = Views;
 			path = "New Group";
@@ -274,6 +280,8 @@
 				659BFC652682955A007CCDA2 /* AccelerometerView.swift in Sources */,
 				650B9BCA2682985D009A1D06 /* MotionManager.swift in Sources */,
 				659BFC632682955A007CCDA2 /* Track_BuddyApp.swift in Sources */,
+				650B9BCC2682CE23009A1D06 /* CameraView.swift in Sources */,
+				650B9BCE2682CF15009A1D06 /* AccelerometerOverlay.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
