@@ -16,11 +16,9 @@ struct AccelerometerView: View {
         GeometryReader { geometry in
             let bounds = min(geometry.size.width, geometry.size.height)
             let innerCircleDiameter = bounds / outerToInnerCircleDiamaterRatio
-            let gValueAtEdge = 3.0
+            let xPosition = -bounds * motionManager.x / outerEdgeGValue
+            let yPosition = -bounds * motionManager.z / outerEdgeGValue
             
-            // Negative values due to SwiftUI origin at top left
-            let xPosition = -bounds * motionManager.x / gValueAtEdge
-            let yPosition = -bounds * motionManager.z / gValueAtEdge
             ZStack(alignment: .center) {
                 Circle()
                 Circle()
@@ -35,6 +33,7 @@ struct AccelerometerView: View {
     
     // MARK: Drawing Constants
     private let outerToInnerCircleDiamaterRatio = 20.0
+    private let outerEdgeGValue = 3.0
   
 }
 
