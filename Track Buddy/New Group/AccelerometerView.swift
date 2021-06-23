@@ -13,13 +13,29 @@ struct AccelerometerView: View {
     @ObservedObject var motionManager = MotionManager()
     
     var body: some View {
-        VStack {
-            Text("x: \(motionManager.x)")
-            Text("y: \(motionManager.y)")
-            Text("z: \(motionManager.z)")
+        GeometryReader { geometry in
+            let bounds = min(geometry.size.width, geometry.size.height)
+            let innerCircleDiameter = bounds / outerToInnerCircleDiamaterRatio
+            let gValueAtEdge = 3.0
+            
+            // Negative values due to SwiftUI origin at top left
+            let xPosition = -bounds * motionManager.x / gValueAtEdge
+            let yPosition = -bounds * motionManager.z / gValueAtEdge
+            ZStack(alignment: .center) {
+                Circle()
+                Circle()
+                // Vertical axis corresponds with car acceleration/deceleration (z axis in Core Motion)
+                // Relevant CM axes will also change depending on device orientation.
+                    .foregroundColor(.orange)
+                    .offset(x: xPosition, y: yPosition)
+                    .frame(width: innerCircleDiameter, height: innerCircleDiameter)
+            }
         }
-        .padding()
     }
+    
+    // MARK: Drawing Constants
+    private let outerToInnerCircleDiamaterRatio = 20.0
+  
 }
 
 extension AccelerometerView {
