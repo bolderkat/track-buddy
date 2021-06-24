@@ -12,7 +12,7 @@ struct AccelerometerOverlay: View {
         ZStack {
             CameraView()
                 .edgesIgnoringSafeArea(.all)
-            AccelerometerView(viewModel: AccelerometerView.ViewModel())
+            AccelerometerView()
                 .padding()
         }
     }
