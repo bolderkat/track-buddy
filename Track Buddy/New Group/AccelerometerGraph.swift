@@ -11,6 +11,7 @@ import SwiftUI
 struct AccelerometerGraph: View {
     @ObservedObject private(set) var motionManager: MotionManager
     
+    
     var body: some View {
         GeometryReader { geometry in
             let bounds = min(geometry.size.width, geometry.size.height)
@@ -20,6 +21,10 @@ struct AccelerometerGraph: View {
             
             ZStack(alignment: .center) {
                 Circle()
+                path
+                    .stroke(Color.orange, lineWidth: 1)
+                    .offset(x: geometry.size.width / 2, y: geometry.size.height / 2)
+                    .scaleEffect(bounds / outerEdgeGValue, anchor: .center)
                 Circle()
                 // Vertical axis corresponds with car acceleration/deceleration (z axis in Core Motion)
                 // Relevant CM axes will also change depending on device orientation.
@@ -27,6 +32,12 @@ struct AccelerometerGraph: View {
                     .offset(x: xPosition, y: yPosition)
                     .frame(width: innerCircleDiameter, height: innerCircleDiameter)
             }
+        }
+    }
+    
+    var path: Path {
+        Path { path in
+            path.addLines(motionManager.recentPointsArray)
         }
     }
     

@@ -8,6 +8,8 @@
 import Foundation
 import CoreMotion
 import Combine
+import Collections
+import CoreGraphics
 
 class MotionManager: ObservableObject {
     private var motionManager: CMMotionManager
@@ -30,6 +32,11 @@ class MotionManager: ObservableObject {
     @Published var maxAcceleration: Double = 0.0
     @Published var maxRight: Double = 0.0
     @Published var maxLeft: Double = 0.0
+    
+    private var recentPoints: Deque<CGPoint> = [] // TODO: think about thread safety?
+    var recentPointsArray: [CGPoint] {
+        Array(recentPoints)
+    }
     
     init() {
         motionManager = CMMotionManager()
@@ -72,5 +79,15 @@ class MotionManager: ObservableObject {
         } else if x < maxLeft {
             maxLeft = x
         }
+        
+        let point = CGPoint(x: x, y: z)
+        // Store values over the last minute for graph tracer line
+        if recentPoints.count >= 60 * 100 {
+            // TODO: if Deque methods are updated to use @discardableResult we can get rid of _ =
+            _ = recentPoints.popFirst()
+        }
+
+        recentPoints.append(point)
+        
     }
 }
