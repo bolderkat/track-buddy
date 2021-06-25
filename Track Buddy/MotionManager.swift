@@ -33,15 +33,21 @@ class MotionManager: ObservableObject {
     @Published var maxRight: Double = 0.0
     @Published var maxLeft: Double = 0.0
     
+    // Parameters
+    private let deviceMotionUpdateInterval: TimeInterval = 1/100
+    private let pointStorageLimit = 300 // number of motion updates stored for tracer graph
+    
     private var recentPoints: Deque<CGPoint> = [] // TODO: think about thread safety?
-    var recentPointsArray: [CGPoint] {
-        Array(recentPoints)
+    var pointPath: CGMutablePath {
+        let path = CGMutablePath()
+        path.addLines(between: Array(recentPoints))
+        return path
     }
     
     init() {
         motionManager = CMMotionManager()
         if motionManager.isDeviceMotionAvailable {
-            motionManager.deviceMotionUpdateInterval = 1/100
+            motionManager.deviceMotionUpdateInterval = deviceMotionUpdateInterval
             startDeviceMotion()
         }
     }
@@ -81,8 +87,8 @@ class MotionManager: ObservableObject {
         }
         
         let point = CGPoint(x: x, y: z)
-        // Store values over the last minute for graph tracer line
-        if recentPoints.count >= 60 * 100 {
+        // Store values over the five seconds for graph tracer line
+        if recentPoints.count >= pointStorageLimit {
             // TODO: if Deque methods are updated to use @discardableResult we can get rid of _ =
             _ = recentPoints.popFirst()
         }

@@ -11,7 +11,6 @@ import SwiftUI
 struct AccelerometerGraph: View {
     @ObservedObject private(set) var motionManager: MotionManager
     
-    
     var body: some View {
         GeometryReader { geometry in
             let bounds = min(geometry.size.width, geometry.size.height)
@@ -21,10 +20,10 @@ struct AccelerometerGraph: View {
             
             ZStack(alignment: .center) {
                 Circle()
-                path
-                    .stroke(Color.orange, lineWidth: 1)
+                Path(motionManager.pointPath)
+                    .stroke(Color.red, lineWidth: tracerLineWidth)
                     .offset(x: geometry.size.width / 2, y: geometry.size.height / 2)
-                    .scaleEffect(bounds / outerEdgeGValue, anchor: .center)
+                    .scaleEffect(-bounds / outerEdgeGValue, anchor: .center)
                 Circle()
                 // Vertical axis corresponds with car acceleration/deceleration (z axis in Core Motion)
                 // Relevant CM axes will also change depending on device orientation.
@@ -35,15 +34,13 @@ struct AccelerometerGraph: View {
         }
     }
     
-    var path: Path {
-        Path { path in
-            path.addLines(motionManager.recentPointsArray)
-        }
-    }
+    
+
     
     // MARK: Drawing Constants
     private let outerToInnerCircleDiamaterRatio = 20.0
     private let outerEdgeGValue = 3.0 // circle size doesn't appear to correspond with this set G value when graph is resized, check your maffs :(
+    private let tracerLineWidth = 0.04
 }
 
 struct AccelerometerGraph_Previews: PreviewProvider {
