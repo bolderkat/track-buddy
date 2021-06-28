@@ -35,12 +35,18 @@ class MotionManager: ObservableObject {
     
     // Parameters
     private let deviceMotionUpdateInterval: TimeInterval = 1/100
-    private let pointStorageLimit = 500 // number of motion updates stored for tracer graph
+    private let pointStorageLimit = 300 // number of motion updates stored for tracer graph
     
     private(set) var recentPoints: Deque<CGPoint> = [] // TODO: think about thread safety?
-    var pointPath: CGMutablePath {
+    func pointPath(atScale factor: CGFloat) -> CGMutablePath {
+        var points: [CGPoint] = []
+        for point in recentPoints {
+            let x = point.x * factor
+            let y = point.y * factor
+            points.append(CGPoint(x: x, y: y))
+        }
         let path = CGMutablePath()
-        path.addLines(between: Array(recentPoints))
+        path.addLines(between: points)
         return path
     }
     

@@ -21,10 +21,9 @@ struct AccelerometerGraph: View {
             
             ZStack(alignment: .center) {
                 Circle()
-                Path(motionManager.pointPath)
+                Path(motionManager.pointPath(atScale: pointScaleFactor))
                     .stroke(Color.red, lineWidth: tracerLineWidth)
                     .offset(x: geometry.size.width / 2, y: geometry.size.height / 2)
-                    .scaleEffect(-bounds / outerEdgeGValue, anchor: .center)
                 Circle()
                 // Vertical axis corresponds with car acceleration/deceleration (z axis in Core Motion)
                 // Relevant CM axes will also change depending on device orientation.
@@ -41,7 +40,7 @@ struct AccelerometerGraph: View {
     // MARK: Drawing Constants
     private let outerToInnerCircleDiamaterRatio = 20.0
     private let outerEdgeGValue = 3.0 // circle size doesn't appear to correspond with this set G value when graph is resized, check your maffs :(
-    private let tracerLineWidth = 0.04
+    private let tracerLineWidth = 1.0
 }
 
 struct AccelerometerGraph_Previews: PreviewProvider {
