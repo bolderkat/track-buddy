@@ -23,21 +23,22 @@ class MotionManager: ObservableObject {
      */
     
     // Acceleration values
-    @Published var x: Double = 0.0
-    @Published var y: Double = 0.0
-    @Published var z: Double = 0.0
+    @Published private(set) var x: Double = 0.0
+    @Published private(set) var y: Double = 0.0
+    @Published private(set) var z: Double = 0.0
     
     // Max G force values
-    @Published var maxBraking: Double = 0.0
-    @Published var maxAcceleration: Double = 0.0
-    @Published var maxRight: Double = 0.0
-    @Published var maxLeft: Double = 0.0
+    @Published private(set) var maxBraking: Double = 0.0
+    @Published private(set) var maxAcceleration: Double = 0.0
+    @Published private(set) var maxRight: Double = 0.0
+    @Published private(set) var maxLeft: Double = 0.0
     
     // Parameters
     private let deviceMotionUpdateInterval: TimeInterval = 1/100
     private let pointStorageLimit = 300 // number of motion updates stored for tracer graph
     
     private(set) var recentPoints: Deque<CGPoint> = [] // TODO: think about thread safety?
+    
     func pointPath(atScale factor: CGFloat) -> CGMutablePath {
         var points: [CGPoint] = []
         for point in recentPoints {
