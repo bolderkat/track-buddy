@@ -35,9 +35,9 @@ class MotionManager: ObservableObject {
     
     // Parameters
     private let deviceMotionUpdateInterval: TimeInterval = 1/100
-    private let pointStorageLimit = 300 // number of motion updates stored for tracer graph
+    private let pointStorageLimit = 500 // number of motion updates stored for tracer graph
     
-    private var recentPoints: Deque<CGPoint> = [] // TODO: think about thread safety?
+    private(set) var recentPoints: Deque<CGPoint> = [] // TODO: think about thread safety?
     var pointPath: CGMutablePath {
         let path = CGMutablePath()
         path.addLines(between: Array(recentPoints))
@@ -54,21 +54,25 @@ class MotionManager: ObservableObject {
     
     private func startDeviceMotion() {
         guard !motionManager.isDeviceMotionActive else { return }
-        
-        // TODO: not recommended to handle updates on main queue
-        motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motionData, error in
+
+        let queue = OperationQueue()
+        motionManager.startDeviceMotionUpdates(to: queue) { [weak self] motionData, error in
             guard error == nil else {
                 // TODO: error handling
                 print(error!)
                 return
             }
             
+            
             if let data = motionData {
-                self?.process(data.userAcceleration)
+                DispatchQueue.main.async {
+                    self?.process(data.userAcceleration)
+                }
             }
         }
     }
     
+    // TODO: a good place to use @MainActor here
     private func process(_ acceleration: CMAcceleration) {
         x = acceleration.x
         y = acceleration.y
