@@ -98,7 +98,7 @@ class MotionManager: ObservableObject {
         }
         
         let point = CGPoint(x: x, y: z)
-        // Store values over the five seconds for graph tracer line
+        // Store values over the specified interval for graph tracer line
         if recentPoints.count >= pointStorageLimit {
             // TODO: if Deque methods are updated to use @discardableResult we can get rid of _ =
             _ = recentPoints.popFirst()
