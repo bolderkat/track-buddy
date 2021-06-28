@@ -14,9 +14,10 @@ struct AccelerometerGraph: View {
     var body: some View {
         GeometryReader { geometry in
             let bounds = min(geometry.size.width, geometry.size.height)
+            let pointScaleFactor = -bounds / outerEdgeGValue
+            let xPosition = motionManager.x * pointScaleFactor
+            let yPosition = motionManager.z * pointScaleFactor
             let innerCircleDiameter = bounds / outerToInnerCircleDiamaterRatio
-            let xPosition = -bounds * motionManager.x / outerEdgeGValue
-            let yPosition = -bounds * motionManager.z / outerEdgeGValue
             
             ZStack(alignment: .center) {
                 Circle()
