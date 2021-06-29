@@ -37,7 +37,7 @@ class MotionManager: ObservableObject {
     private let deviceMotionUpdateInterval: TimeInterval = 1/100
     private let pointStorageLimit = 300 // number of motion updates stored for tracer graph
     
-    private(set) var recentPoints: Deque<CGPoint> = [] // TODO: think about thread safety?
+    private(set) var recentPoints: Deque<CGPoint> = [] // TODO: dluo- think about thread safety?
     
     func pointPath(atScale factor: CGFloat) -> CGMutablePath {
         let points = recentPoints.map { CGPoint(x: $0.x * factor, y: $0.y * factor) }
@@ -95,7 +95,7 @@ class MotionManager: ObservableObject {
         let point = CGPoint(x: x, y: z)
         // Store values over the specified interval for graph tracer line
         if recentPoints.count >= pointStorageLimit {
-            // TODO: if Deque methods are updated to use @discardableResult we can get rid of _ =
+            // If Deque methods are updated to use @discardableResult we can get rid of _ =
             _ = recentPoints.popFirst()
         }
 
