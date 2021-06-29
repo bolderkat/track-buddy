@@ -40,12 +40,7 @@ class MotionManager: ObservableObject {
     private(set) var recentPoints: Deque<CGPoint> = [] // TODO: think about thread safety?
     
     func pointPath(atScale factor: CGFloat) -> CGMutablePath {
-        var points: [CGPoint] = []
-        for point in recentPoints {
-            let x = point.x * factor
-            let y = point.y * factor
-            points.append(CGPoint(x: x, y: y))
-        }
+        let points = recentPoints.map { CGPoint(x: $0.x * factor, y: $0.y * factor) }
         let path = CGMutablePath()
         path.addLines(between: points)
         return path
