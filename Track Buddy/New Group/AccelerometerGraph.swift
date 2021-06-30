@@ -23,7 +23,7 @@ struct AccelerometerGraph: View {
             let bounds = min(geometry.size.width, geometry.size.height)
             
             // Multiply accelerometer G values so they are displayed at a meaningful scale on screen
-            let pointScaleFactor = -bounds / Metrics.outerEdgeGValue
+            let pointScaleFactor = bounds / Metrics.outerEdgeGValue
             let xPosition = motionManager.x * pointScaleFactor
             let yPosition = motionManager.z * pointScaleFactor
             let innerCircleDiameter = bounds / Metrics.outerToInnerCircleDiamaterRatio
