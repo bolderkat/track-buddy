@@ -15,10 +15,10 @@ class MotionManager: ObservableObject {
     private var motionManager: CMMotionManager
     
     /* With device oriented vertically, axes are:
-     +Z - braking
-     -Z - acceleration
-     +X - right
-     -X - left
+     +Z - acceleration
+     -Z - braking
+     +X - left
+     -X - right
      
      */
     
@@ -80,16 +80,16 @@ class MotionManager: ObservableObject {
         y = acceleration.y
         z = acceleration.z
         
-        if z > maxBraking {
-            maxBraking = z
-        } else if z < maxAcceleration {
+        if z > maxAcceleration {
             maxAcceleration = z
+        } else if z < maxBraking {
+            maxBraking = z
         }
         
-        if x > maxRight {
-            maxRight = x
-        } else if x < maxLeft {
+        if x > maxLeft {
             maxLeft = x
+        } else if x < maxRight {
+            maxRight = x
         }
         
         let point = CGPoint(x: x, y: z)
