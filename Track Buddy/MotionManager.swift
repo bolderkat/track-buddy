@@ -14,7 +14,22 @@ import CoreGraphics
 class MotionManager: ObservableObject {
     private enum Parameters {
         static let deviceMotionUpdateInterval: TimeInterval = 1/100
-        static let pointStorageLimit = 300 // number of motion updates stored for tracer graph
+        static let graphUpdateInterval = RunLoop.SchedulerTimeType.Stride(1/15)
+        static var pointStorageLimit: Int {
+            Int(1 / graphUpdateInterval.magnitude * 3)
+        } // final number after multiplier == number of seconds retained for tracer line
+    }
+    
+    // Expose graph update interval to Views that need it
+    var graphUpdateInterval: TimeInterval { Parameters.graphUpdateInterval.magnitude }
+
+    init() {
+        motionManager = CMMotionManager()
+        if motionManager.isDeviceMotionAvailable {
+            motionManager.deviceMotionUpdateInterval = Parameters.deviceMotionUpdateInterval
+            startDeviceMotion()
+        }
+        setUpThrottledPointPublisher()
     }
     
     private var motionManager: CMMotionManager
@@ -28,20 +43,26 @@ class MotionManager: ObservableObject {
      */
     
     // Acceleration values
-    @Published private(set) var x: Double = 0.0
-    @Published private(set) var y: Double = 0.0
-    @Published private(set) var z: Double = 0.0
+    private(set) var x: Double = 0.0
+    private(set) var y: Double = 0.0
+    private(set) var z: Double = 0.0
+    
     
     // Max G force values
     @Published private(set) var maxBraking: Double = 0.0
     @Published private(set) var maxAcceleration: Double = 0.0
     @Published private(set) var maxRight: Double = 0.0
     @Published private(set) var maxLeft: Double = 0.0
+
     
-    // Parameters
+    // Rate-limited point that updates at graphUpdateInterval to smooth out graph movement
+    @Published private(set) var throttledPoint: CGPoint = .zero
+    private let pointPublisher = PassthroughSubject<CGPoint, Never>()
+    private var subscriptions = Set<AnyCancellable>()
     
     
-    private(set) var recentPoints: Deque<CGPoint> = [] // TODO: dluo- think about thread safety?
+    // Store recent rate-limited points to render path representing past G force values
+    private var recentPoints: Deque<CGPoint> = [] // TODO: dluo- think about thread safety?
     
     func pointPath(atScale factor: CGFloat) -> CGMutablePath {
         let points = recentPoints.map { CGPoint(x: $0.x * factor, y: $0.y * factor) }
@@ -50,13 +71,6 @@ class MotionManager: ObservableObject {
         return path
     }
     
-    init() {
-        motionManager = CMMotionManager()
-        if motionManager.isDeviceMotionAvailable {
-            motionManager.deviceMotionUpdateInterval = Parameters.deviceMotionUpdateInterval
-            startDeviceMotion()
-        }
-    }
     
     private func startDeviceMotion() {
         guard !motionManager.isDeviceMotionActive else { return }
@@ -69,13 +83,24 @@ class MotionManager: ObservableObject {
                 return
             }
             
-            
             if let data = motionData {
                 DispatchQueue.main.async {
                     self?.process(data.userAcceleration)
                 }
             }
         }
+    }
+    
+    private func setUpThrottledPointPublisher() {
+        let cancellable = pointPublisher
+            .throttle(for: Parameters.graphUpdateInterval, scheduler: RunLoop.main, latest: true)
+            .receive(on: DispatchQueue.main, options: nil)
+            .sink(receiveValue: { [weak self] point in
+                self?.throttledPoint = point
+                self?.addToDeque(with: point)
+            })
+        
+        subscriptions.insert(cancellable)
     }
     
     // TODO: dluo - a good place to use @MainActor here
@@ -97,13 +122,7 @@ class MotionManager: ObservableObject {
         }
         
         let point = CGPoint(x: x, y: z)
-        // Store values over the specified interval for graph tracer line
-        if recentPoints.count >= Parameters.pointStorageLimit {
-            // If Deque methods are updated to use @discardableResult we can get rid of _ =
-            _ = recentPoints.popFirst()
-        }
-
-        recentPoints.append(point)
+        pointPublisher.send(point)
     }
     
     func resetMaxValues() {
@@ -111,5 +130,13 @@ class MotionManager: ObservableObject {
         maxAcceleration = 0.0
         maxRight = 0.0
         maxLeft = 0.0
+    }
+    
+    func addToDeque(with point: CGPoint) {
+        if self.recentPoints.count >= Parameters.pointStorageLimit {
+            // If Deque methods are updated to use @discardableResult we can get rid of _ =
+            _ = self.recentPoints.popFirst()
+        }
+        self.recentPoints.append(point)
     }
 }

@@ -24,8 +24,8 @@ struct AccelerometerGraph: View {
             
             // Multiply accelerometer G values so they are displayed at a meaningful scale on screen
             let pointScaleFactor = bounds / Metrics.outerEdgeGFactor
-            let xPosition = motionManager.x * pointScaleFactor
-            let yPosition = motionManager.z * pointScaleFactor
+            let xPosition = motionManager.throttledPoint.x * pointScaleFactor
+            let yPosition = motionManager.throttledPoint.y * pointScaleFactor
             let innerCircleDiameter = bounds / Metrics.outerToInnerCircleDiamaterRatio
             
             ZStack(alignment: .center) {
@@ -40,6 +40,7 @@ struct AccelerometerGraph: View {
                     .offset(x: xPosition, y: yPosition)
                     .frame(width: innerCircleDiameter, height: innerCircleDiameter)
             }
+            .animation(.linear(duration: motionManager.graphUpdateInterval))
         }
     }
     
