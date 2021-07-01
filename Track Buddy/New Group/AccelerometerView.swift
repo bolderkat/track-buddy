@@ -11,14 +11,15 @@ struct AccelerometerView: View {
     @ObservedObject private var motionManager = MotionManager()
     
     var body: some View {
-        HStack {
-            maxLabel(for: .right)
-            VStack {
-                maxLabel(for: .braking)
+        VStack {
+            maxLabel(for: .braking)
+            HStack {
+                maxLabel(for: .right)
                 AccelerometerGraph(motionManager: motionManager)
-                maxLabel(for: .acceleration)
+                maxLabel(for: .left)
             }
-            maxLabel(for: .left)
+            maxLabel(for: .acceleration)
+            resetButton
         }
     }
     
@@ -65,6 +66,17 @@ struct AccelerometerView: View {
         
         return Text(valueString)
             .foregroundColor(.orange)
+    }
+    
+    private var resetButton: some View {
+        Button {
+            motionManager.resetMaxValues()
+        } label: {
+            Text("Reset")
+        }
+        .padding()
+        .background(RoundedRectangle(cornerRadius: 20.0))
+        
     }
     
     private enum Direction {

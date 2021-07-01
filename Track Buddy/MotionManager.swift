@@ -74,7 +74,7 @@ class MotionManager: ObservableObject {
         }
     }
     
-    // TODO: a good place to use @MainActor here
+    // TODO: dluo - a good place to use @MainActor here
     private func process(_ acceleration: CMAcceleration) {
         x = acceleration.x
         y = acceleration.y
@@ -100,6 +100,12 @@ class MotionManager: ObservableObject {
         }
 
         recentPoints.append(point)
-        
+    }
+    
+    func resetMaxValues() {
+        maxBraking = 0.0
+        maxAcceleration = 0.0
+        maxRight = 0.0
+        maxLeft = 0.0
     }
 }
