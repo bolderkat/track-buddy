@@ -12,6 +12,11 @@ import Collections
 import CoreGraphics
 
 class MotionManager: ObservableObject {
+    private enum Parameters {
+        static let deviceMotionUpdateInterval: TimeInterval = 1/100
+        static let pointStorageLimit = 300 // number of motion updates stored for tracer graph
+    }
+    
     private var motionManager: CMMotionManager
     
     /* With device oriented vertically, axes are:
@@ -34,8 +39,7 @@ class MotionManager: ObservableObject {
     @Published private(set) var maxLeft: Double = 0.0
     
     // Parameters
-    private let deviceMotionUpdateInterval: TimeInterval = 1/100
-    private let pointStorageLimit = 300 // number of motion updates stored for tracer graph
+    
     
     private(set) var recentPoints: Deque<CGPoint> = [] // TODO: dluo- think about thread safety?
     
@@ -49,7 +53,7 @@ class MotionManager: ObservableObject {
     init() {
         motionManager = CMMotionManager()
         if motionManager.isDeviceMotionAvailable {
-            motionManager.deviceMotionUpdateInterval = deviceMotionUpdateInterval
+            motionManager.deviceMotionUpdateInterval = Parameters.deviceMotionUpdateInterval
             startDeviceMotion()
         }
     }
@@ -94,7 +98,7 @@ class MotionManager: ObservableObject {
         
         let point = CGPoint(x: x, y: z)
         // Store values over the specified interval for graph tracer line
-        if recentPoints.count >= pointStorageLimit {
+        if recentPoints.count >= Parameters.pointStorageLimit {
             // If Deque methods are updated to use @discardableResult we can get rid of _ =
             _ = recentPoints.popFirst()
         }
