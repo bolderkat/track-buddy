@@ -8,6 +8,10 @@
 import SwiftUI
 
 struct AccelerometerView: View {
+    private enum Metrics {
+        static let resetButtonCornerRadius = 20.0
+    }
+    
     @ObservedObject private var motionManager = MotionManager()
     
     var body: some View {
@@ -75,7 +79,7 @@ struct AccelerometerView: View {
             Text("Reset")
         }
         .padding()
-        .background(RoundedRectangle(cornerRadius: 20.0))
+        .background(RoundedRectangle(cornerRadius: Metrics.resetButtonCornerRadius))
         
     }
     
