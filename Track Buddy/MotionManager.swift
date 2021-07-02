@@ -96,10 +96,10 @@ class MotionManager: ObservableObject {
         let cancellable = pointPublisher
             .throttle(for: Parameters.graphUpdateInterval, scheduler: RunLoop.main, latest: true)
             .receive(on: DispatchQueue.main, options: nil)
-            .sink(receiveValue: { [weak self] point in
+            .sink { [weak self] point in
                 self?.throttledPoint = point
                 self?.addToDeque(with: point)
-            })
+            }
         
         subscriptions.insert(cancellable)
     }
