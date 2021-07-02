@@ -16,11 +16,12 @@ class MotionManager: ObservableObject {
         static let deviceMotionUpdateInterval: TimeInterval = 1/100
         static let graphUpdateInterval = RunLoop.SchedulerTimeType.Stride(1/15)
         static var pointStorageLimit: Int {
+            // final number after multiplier == number of seconds retained for tracer line
             Int(1 / graphUpdateInterval.magnitude * 3)
-        } // final number after multiplier == number of seconds retained for tracer line
+        }
     }
     
-    // Expose graph update interval to Views that need it
+    /// Provides rate of throttled accelerometer data updates in seconds for UI rendering purposes.
     var graphUpdateInterval: TimeInterval { Parameters.graphUpdateInterval.magnitude }
 
     init() {
@@ -55,7 +56,7 @@ class MotionManager: ObservableObject {
     @Published private(set) var maxLeft: Double = 0.0
 
     
-    // Rate-limited point that updates at graphUpdateInterval to smooth out graph movement
+    // Rate-limited point that updates at `graphUpdateInterval` to smooth out graph movement
     @Published private(set) var throttledPoint: CGPoint = .zero
     private let pointPublisher = PassthroughSubject<CGPoint, Never>()
     private var subscriptions = Set<AnyCancellable>()
