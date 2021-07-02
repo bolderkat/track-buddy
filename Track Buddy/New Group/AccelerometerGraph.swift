@@ -10,9 +10,8 @@ import SwiftUI
 
 struct AccelerometerGraph: View {
     private enum Metrics {
-        // MARK: Drawing Constants
-        static let outerToInnerCircleDiamaterRatio = 20.0
-        static let outerEdgeGValue = 3.0 // circle size doesn't appear to correspond with this set G value when graph is resized, check your maffs :(
+        static let outerToInnerCircleDiamaterRatio = 20.0 // higher value means smaller dot on graph
+        static let outerEdgeGFactor = 2.0 // higher values mean higher G forces when dot reaches edge of graph
         static let tracerLineWidth = 1.0
     }
     
@@ -23,9 +22,9 @@ struct AccelerometerGraph: View {
             let bounds = min(geometry.size.width, geometry.size.height)
             
             // Multiply accelerometer G values so they are displayed at a meaningful scale on screen
-            let pointScaleFactor = -bounds / Metrics.outerEdgeGValue
-            let xPosition = motionManager.x * pointScaleFactor
-            let yPosition = motionManager.z * pointScaleFactor
+            let pointScaleFactor = bounds / Metrics.outerEdgeGFactor
+            let xPosition = motionManager.throttledPoint.x * pointScaleFactor
+            let yPosition = motionManager.throttledPoint.y * pointScaleFactor
             let innerCircleDiameter = bounds / Metrics.outerToInnerCircleDiamaterRatio
             
             ZStack(alignment: .center) {
@@ -40,6 +39,7 @@ struct AccelerometerGraph: View {
                     .offset(x: xPosition, y: yPosition)
                     .frame(width: innerCircleDiameter, height: innerCircleDiameter)
             }
+            .animation(.linear(duration: motionManager.graphUpdateInterval))
         }
     }
     

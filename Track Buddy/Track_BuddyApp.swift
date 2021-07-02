@@ -11,7 +11,8 @@ import SwiftUI
 struct Track_BuddyApp: App {
     var body: some Scene {
         WindowGroup {
-            AccelerometerOverlay()
+            AccelerometerView()
+                .padding()
         }
     }
 }
