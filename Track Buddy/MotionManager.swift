@@ -10,15 +10,17 @@ import CoreMotion
 import Combine
 import Collections
 import CoreGraphics
+import Accelerate
 
 class MotionManager: ObservableObject {
     private enum Parameters {
         static let deviceMotionUpdateInterval: TimeInterval = 1/100
         static let graphUpdateInterval = RunLoop.SchedulerTimeType.Stride(1/15)
-        static var pointStorageLimit: Int {
-            // final number after multiplier == number of seconds retained for tracer line
-            Int(1 / graphUpdateInterval.magnitude * 3)
-        }
+        static let secondsStoredForTracer: TimeInterval = 3
+        static let pointStorageLimit = Int(1 / graphUpdateInterval.magnitude * secondsStoredForTracer)
+        static let numberOfInterpolatedPathPoints = vDSP_Length(1 / deviceMotionUpdateInterval * secondsStoredForTracer)
+        /// Unit stride for Accelerate calculations
+        static let stride = vDSP_Stride(1)
     }
     
     /// Provides rate of throttled accelerometer data updates in seconds for UI rendering purposes.
@@ -66,10 +68,51 @@ class MotionManager: ObservableObject {
     private var recentPoints: Deque<CGPoint> = [] // TODO: dluo- think about thread safety?
     
     func pointPath(atScale factor: CGFloat) -> CGMutablePath {
-        let points = recentPoints.map { CGPoint(x: $0.x * factor, y: $0.y * factor) }
+        let xPoints = recentPoints.map { Double($0.x * factor) }
+        let yPoints = recentPoints.map { Double($0.y * factor) }
+        
+        /* Interpolate points to fill in gaps between rate-limited points to create a smooth tracer line.
+         
+         Using this interpolate-to-smooth approach because generating the line with the raw accelerometer data at 100 Hz
+         can produce visible divergence between the movement of the dot in the graph and the line that is traced under it.
+         
+         */
+        
+        let interpolatedXPoints = interpolate(xPoints)
+        let interpolatedYPoints = interpolate(yPoints)
+        
         let path = CGMutablePath()
-        path.addLines(between: points)
+        guard interpolatedXPoints.count == interpolatedYPoints.count else { return path }
+        
+        var interpolatedPoints: [CGPoint] = []
+        for i in 0..<interpolatedXPoints.count {
+            interpolatedPoints.append(CGPoint(
+                x: interpolatedXPoints[i],
+                y: interpolatedYPoints[i]
+            ))
+        }
+        
+        path.addLines(between: interpolatedPoints)
         return path
+    }
+    
+    private func interpolate(_ points: [Double]) -> [Double] {
+        var indices: [Double] = []
+        for i in 0..<points.count {
+            indices.append(Double(i) * 1 / graphUpdateInterval)
+        }
+        
+        guard points.count > 0 else { return [] }
+        let numberOfInterpolatedPoints = Int(Double(1) / Parameters.deviceMotionUpdateInterval * Double(points.count))
+        
+        var result = [Double](repeating: 0, count: numberOfInterpolatedPoints)
+        vDSP_vgenpD(points, Parameters.stride,
+                    indices, Parameters.stride,
+                    &result, Parameters.stride,
+                    vDSP_Length(numberOfInterpolatedPoints),
+                    vDSP_Length(points.count))
+        
+        return result
     }
     
     
