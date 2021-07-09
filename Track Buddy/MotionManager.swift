@@ -99,11 +99,6 @@ class MotionManager: ObservableObject {
     
     private func interpolate(_ points: [Double]) -> [Double] {
         guard points.count > 0 else { return [] }
-        var indices: [Double] = []
-        for i in 0..<points.count {
-            indices.append(Double(i) * 1 / graphUpdateInterval)
-        }
-        
         let numberOfInterpolatedPoints = Int(Double(1) / Parameters.deviceMotionUpdateInterval * Double(points.count) * graphUpdateInterval)
         
         // Generate control array to smooth interpolation result
