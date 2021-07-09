@@ -11,6 +11,7 @@ import Combine
 import Collections
 import CoreGraphics
 import Accelerate
+import simd
 
 class MotionManager: ObservableObject {
     private enum Parameters {
@@ -97,17 +98,26 @@ class MotionManager: ObservableObject {
     }
     
     private func interpolate(_ points: [Double]) -> [Double] {
+        guard points.count > 0 else { return [] }
         var indices: [Double] = []
         for i in 0..<points.count {
             indices.append(Double(i) * 1 / graphUpdateInterval)
         }
         
-        guard points.count > 0 else { return [] }
-        let numberOfInterpolatedPoints = Int(Double(1) / Parameters.deviceMotionUpdateInterval * Double(points.count))
+        let numberOfInterpolatedPoints = Int(Double(1) / Parameters.deviceMotionUpdateInterval * Double(points.count) * graphUpdateInterval)
         
+        // Generate control array to smooth interpolation result
+        let denominator = Double(numberOfInterpolatedPoints) / Double(points.count - 1)
+        
+        let control: [Double] = (0...numberOfInterpolatedPoints).map {
+            let x = Double($0) / denominator
+            return floor(x) + simd_smoothstep(0, 1, simd_fract(x))
+        }
+        
+        // Use quadratic interpolation to generate a smoothed line between throttled points
         var result = [Double](repeating: 0, count: numberOfInterpolatedPoints)
-        vDSP_vgenpD(points, Parameters.stride,
-                    indices, Parameters.stride,
+        vDSP_vqintD(points,
+                    control, Parameters.stride,
                     &result, Parameters.stride,
                     vDSP_Length(numberOfInterpolatedPoints),
                     vDSP_Length(points.count))
