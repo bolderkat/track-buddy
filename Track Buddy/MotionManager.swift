@@ -176,11 +176,12 @@ class MotionManager: ObservableObject {
         pointPublisher.send(point)
     }
     
-    func resetMaxValues() {
+    func resetValues() {
         maxBraking = 0.0
         maxAcceleration = 0.0
         maxRight = 0.0
         maxLeft = 0.0
+        recentPoints = []
     }
     
     func addToDeque(with point: CGPoint) {

@@ -74,7 +74,7 @@ struct AccelerometerView: View {
     
     private var resetButton: some View {
         Button {
-            motionManager.resetMaxValues()
+            motionManager.resetValues()
         } label: {
             Text("Reset")
         }
