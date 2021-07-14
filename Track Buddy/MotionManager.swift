@@ -21,7 +21,7 @@ class MotionManager: ObservableObject {
         static let pointStorageLimit = Int(1 / graphUpdateInterval.magnitude * secondsStoredForTracer)
         static let numberOfInterpolatedPathPoints = vDSP_Length(1 / deviceMotionUpdateInterval * secondsStoredForTracer)
         /// Unit stride for Accelerate calculations
-        static let stride = vDSP_Stride(1)
+        static let accelerateStride = vDSP_Stride(1)
     }
     
     /// Provides rate of throttled accelerometer data updates in seconds for UI rendering purposes.
@@ -68,9 +68,7 @@ class MotionManager: ObservableObject {
     // Store recent rate-limited points to render path representing past G force values
     private var recentPoints: Deque<CGPoint> = [] // TODO: dluo- think about thread safety?
     
-    func pointPath(atScale factor: CGFloat) -> CGMutablePath {
-        let xPoints = recentPoints.map { Double($0.x * factor) }
-        let yPoints = recentPoints.map { Double($0.y * factor) }
+    func pointPath(at scaleFactor: CGFloat) -> CGMutablePath {
         
         /* Interpolate points to fill in gaps between rate-limited points to create a smooth tracer line.
          
@@ -79,26 +77,16 @@ class MotionManager: ObservableObject {
          
          */
         
-        let interpolatedXPoints = interpolate(xPoints)
-        let interpolatedYPoints = interpolate(yPoints)
-        
+        let interpolatedPoints = interpolate(recentPoints, at: scaleFactor)
         let path = CGMutablePath()
-        guard interpolatedXPoints.count == interpolatedYPoints.count else { return path }
-        
-        var interpolatedPoints: [CGPoint] = []
-        for i in 0..<interpolatedXPoints.count {
-            interpolatedPoints.append(CGPoint(
-                x: interpolatedXPoints[i],
-                y: interpolatedYPoints[i]
-            ))
-        }
-        
         path.addLines(between: interpolatedPoints)
         return path
     }
     
-    private func interpolate(_ points: [Double]) -> [Double] {
+    private func interpolate(_ points: Deque<CGPoint>, at scaleFactor: CGFloat) -> [CGPoint] {
         guard points.count > 0 else { return [] }
+        let xPoints = points.map { Double($0.x * scaleFactor) }
+        let yPoints = points.map { Double($0.y * scaleFactor) }
         let numberOfInterpolatedPoints = Int(Double(1) / Parameters.deviceMotionUpdateInterval * Double(points.count) * graphUpdateInterval)
         
         // Generate control array to smooth interpolation result
@@ -110,14 +98,28 @@ class MotionManager: ObservableObject {
         }
         
         // Use quadratic interpolation to generate a smoothed line between throttled points
-        var result = [Double](repeating: 0, count: numberOfInterpolatedPoints)
-        vDSP_vqintD(points,
-                    control, Parameters.stride,
-                    &result, Parameters.stride,
+        var xResult = [Double](repeating: 0, count: numberOfInterpolatedPoints)
+        var yResult = [Double](repeating: 0, count: numberOfInterpolatedPoints)
+        vDSP_vqintD(xPoints,
+                    control, Parameters.accelerateStride,
+                    &xResult, Parameters.accelerateStride,
+                    vDSP_Length(numberOfInterpolatedPoints),
+                    vDSP_Length(points.count))
+        vDSP_vqintD(yPoints,
+                    control, Parameters.accelerateStride,
+                    &yResult, Parameters.accelerateStride,
                     vDSP_Length(numberOfInterpolatedPoints),
                     vDSP_Length(points.count))
         
-        return result
+        var combinedResult: [CGPoint] = []
+        for i in 0..<xResult.count {
+            combinedResult.append(CGPoint(
+                x: xResult[i],
+                y: yResult[i]
+            ))
+        }
+        
+        return combinedResult
     }
     
     
