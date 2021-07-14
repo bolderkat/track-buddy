@@ -10,7 +10,7 @@ import SwiftUI
 
 struct AccelerometerGraph: View {
     private enum Metrics {
-        static let outerToInnerCircleDiamaterRatio = 20.0 // higher value means smaller dot on graph
+        static let outerToInnerCircleDiamaterRatio = 10.0 // higher value means smaller dot on graph
         static let outerEdgeGFactor = 2.0 // higher values mean higher G forces when dot reaches edge of graph
         static let tracerLineWidth = 1.0
         static let tracerLineOpacity = 0.5
