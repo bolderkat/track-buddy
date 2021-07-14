@@ -17,7 +17,7 @@ class MotionManager: ObservableObject {
     private enum Parameters {
         static let deviceMotionUpdateInterval: TimeInterval = 1/100
         static let graphUpdateInterval = RunLoop.SchedulerTimeType.Stride(1/15)
-        static let secondsStoredForTracer: TimeInterval = 3
+        static let secondsStoredForTracer: TimeInterval = 1
         static let pointStorageLimit = Int(1 / graphUpdateInterval.magnitude * secondsStoredForTracer)
         static let numberOfInterpolatedPathPoints = vDSP_Length(1 / deviceMotionUpdateInterval * secondsStoredForTracer)
         /// Unit stride for Accelerate calculations
