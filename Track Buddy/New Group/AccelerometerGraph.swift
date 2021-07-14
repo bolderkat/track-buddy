@@ -13,6 +13,7 @@ struct AccelerometerGraph: View {
         static let outerToInnerCircleDiamaterRatio = 20.0 // higher value means smaller dot on graph
         static let outerEdgeGFactor = 2.0 // higher values mean higher G forces when dot reaches edge of graph
         static let tracerLineWidth = 1.0
+        static let tracerLineOpacity = 0.5
     }
     
     @ObservedObject private(set) var motionManager: MotionManager
@@ -32,6 +33,7 @@ struct AccelerometerGraph: View {
                 Path(motionManager.pointPath(at: pointScaleFactor))
                     .stroke(Color.red, lineWidth: Metrics.tracerLineWidth)
                     .offset(x: geometry.size.width / 2, y: geometry.size.height / 2)
+                    .opacity(Metrics.tracerLineOpacity)
                 Circle()
                 // Vertical axis corresponds with car acceleration/deceleration (z axis in Core Motion)
                 // Relevant CM axes will also change depending on device orientation.
