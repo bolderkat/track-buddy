@@ -29,7 +29,7 @@ struct AccelerometerGraph: View {
             
             ZStack(alignment: .center) {
                 Circle()
-                Path(motionManager.pointPath(atScale: pointScaleFactor))
+                Path(motionManager.pointPath(at: pointScaleFactor))
                     .stroke(Color.red, lineWidth: Metrics.tracerLineWidth)
                     .offset(x: geometry.size.width / 2, y: geometry.size.height / 2)
                 Circle()

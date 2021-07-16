@@ -10,15 +10,17 @@ import CoreMotion
 import Combine
 import Collections
 import CoreGraphics
+import Accelerate
+import simd
 
 class MotionManager: ObservableObject {
     private enum Parameters {
         static let deviceMotionUpdateInterval: TimeInterval = 1/100
         static let graphUpdateInterval = RunLoop.SchedulerTimeType.Stride(1/15)
-        static var pointStorageLimit: Int {
-            // final number after multiplier == number of seconds retained for tracer line
-            Int(1 / graphUpdateInterval.magnitude * 3)
-        }
+        static let secondsStoredForTracer: TimeInterval = 3
+        static let pointStorageLimit = Int(1 / graphUpdateInterval.magnitude * secondsStoredForTracer)
+        static let numberOfInterpolatedPathPoints = vDSP_Length(1 / deviceMotionUpdateInterval * secondsStoredForTracer)
+        static let accelerateStride = vDSP_Stride(1)
     }
     
     /// Provides rate of throttled accelerometer data updates in seconds for UI rendering purposes.
@@ -65,11 +67,66 @@ class MotionManager: ObservableObject {
     // Store recent rate-limited points to render path representing past G force values
     private var recentPoints: Deque<CGPoint> = [] // TODO: dluo- think about thread safety?
     
-    func pointPath(atScale factor: CGFloat) -> CGMutablePath {
-        let points = recentPoints.map { CGPoint(x: $0.x * factor, y: $0.y * factor) }
+    func pointPath(at scaleFactor: CGFloat) -> CGMutablePath {
+        
+        /* Interpolate points to fill in gaps between rate-limited points to create a smooth tracer line.
+         
+         Using this interpolate-to-smooth approach because generating the line with the raw accelerometer data at 100 Hz
+         can produce visible divergence between the movement of the dot in the graph and the line that is traced under it.
+         
+         */
+        
+        let interpolatedPoints = interpolate(recentPoints, at: scaleFactor)
         let path = CGMutablePath()
-        path.addLines(between: points)
+        path.addLines(between: interpolatedPoints)
         return path
+    }
+    
+    private func interpolate(_ points: Deque<CGPoint>, at scaleFactor: CGFloat) -> [CGPoint] {
+        // Make sure there are at least two points to interpolate between
+        guard points.count >= 2 else { return Array(points) }
+        let xPoints = points.map { Double($0.x * scaleFactor) }
+        let yPoints = points.map { Double($0.y * scaleFactor) }
+        let numberOfInterpolatedPoints = Int(Double(1) / Parameters.deviceMotionUpdateInterval * Double(points.count) * graphUpdateInterval)
+        
+        // Generate control array to smooth interpolation result
+        let denominator = Double(numberOfInterpolatedPoints) / Double(points.count - 1)
+        guard denominator > 0 else {
+            assertionFailure("""
+            Denominator for tracer line interpolation control array is 0.
+            Check deviceMotionUpdateInterval or graphUpdateInterval in MotionManager.Parameters.
+            """)
+            return Array(points)
+        }
+        
+        let control: [Double] = (0...numberOfInterpolatedPoints).map {
+            let x = Double($0) / denominator
+            return floor(x) + simd_smoothstep(0, 1, simd_fract(x))
+        }
+        
+        // Use quadratic interpolation to generate a smoothed line between throttled points
+        var xResult = [Double](repeating: 0, count: numberOfInterpolatedPoints)
+        var yResult = [Double](repeating: 0, count: numberOfInterpolatedPoints)
+        vDSP_vqintD(xPoints,
+                    control, Parameters.accelerateStride,
+                    &xResult, Parameters.accelerateStride,
+                    vDSP_Length(numberOfInterpolatedPoints),
+                    vDSP_Length(points.count))
+        vDSP_vqintD(yPoints,
+                    control, Parameters.accelerateStride,
+                    &yResult, Parameters.accelerateStride,
+                    vDSP_Length(numberOfInterpolatedPoints),
+                    vDSP_Length(points.count))
+        
+        var combinedResult: [CGPoint] = []
+        for i in 0..<xResult.count {
+            combinedResult.append(CGPoint(
+                x: xResult[i],
+                y: yResult[i]
+            ))
+        }
+        
+        return combinedResult
     }
     
     
