@@ -20,7 +20,6 @@ class MotionManager: ObservableObject {
         static let secondsStoredForTracer: TimeInterval = 3
         static let pointStorageLimit = Int(1 / graphUpdateInterval.magnitude * secondsStoredForTracer)
         static let numberOfInterpolatedPathPoints = vDSP_Length(1 / deviceMotionUpdateInterval * secondsStoredForTracer)
-        /// Unit stride for Accelerate calculations
         static let accelerateStride = vDSP_Stride(1)
     }
     
@@ -84,13 +83,21 @@ class MotionManager: ObservableObject {
     }
     
     private func interpolate(_ points: Deque<CGPoint>, at scaleFactor: CGFloat) -> [CGPoint] {
-        guard points.count > 0 else { return [] }
+        // Make sure there are at least two points to interpolate between
+        guard points.count >= 2 else { return Array(points) }
         let xPoints = points.map { Double($0.x * scaleFactor) }
         let yPoints = points.map { Double($0.y * scaleFactor) }
         let numberOfInterpolatedPoints = Int(Double(1) / Parameters.deviceMotionUpdateInterval * Double(points.count) * graphUpdateInterval)
         
         // Generate control array to smooth interpolation result
         let denominator = Double(numberOfInterpolatedPoints) / Double(points.count - 1)
+        guard denominator > 0 else {
+            assertionFailure("""
+            Denominator for tracer line interpolation control array is 0.
+            Check deviceMotionUpdateInterval or graphUpdateInterval in MotionManager.Parameters.
+            """)
+            return Array(points)
+        }
         
         let control: [Double] = (0...numberOfInterpolatedPoints).map {
             let x = Double($0) / denominator
